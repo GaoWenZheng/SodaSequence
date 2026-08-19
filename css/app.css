@@ -368,6 +368,104 @@ h1{
    - 页面本身不滚动
    ============================================================ */
 
+
+
+/* ============================================================
+   每日挑战关卡切换
+   ============================================================ */
+
+.daily-stage-bar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 9px;
+  margin-top:8px;
+}
+
+.daily-stage-bar.hidden{
+  display:none;
+}
+
+.daily-stage-label{
+  flex:0 0 auto;
+  padding:0 3px;
+  color:#8197a4;
+  font-size:10px;
+  font-weight:800;
+}
+
+.daily-stage-buttons{
+  display:flex;
+  flex:1;
+  min-width:0;
+  gap:5px;
+}
+
+.daily-stage-chip{
+  display:flex;
+  flex:1;
+  min-width:0;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  min-height:34px;
+  padding:5px 8px;
+  border:1px solid rgba(47,84,103,.09);
+  border-radius:10px;
+  color:#577184;
+  background:rgba(255,255,255,.64);
+}
+
+.daily-stage-chip .stage-number{
+  font-size:11px;
+  font-weight:900;
+}
+
+.daily-stage-chip .stage-state{
+  overflow:hidden;
+  color:#8ba0aa;
+  font-size:9px;
+  font-weight:800;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.daily-stage-chip.active{
+  border-color:rgba(141,102,234,.30);
+  color:#5f48c9;
+  background:rgba(249,247,255,.98);
+  box-shadow:0 4px 14px rgba(91,70,175,.10);
+}
+
+.daily-stage-chip.completed{
+  border-color:rgba(57,171,119,.20);
+  background:rgba(242,252,247,.92);
+}
+
+.daily-stage-chip.completed .stage-state{
+  color:#3a976c;
+}
+
+.daily-stage-chip.locked{
+  opacity:.48;
+  cursor:not-allowed;
+}
+
+
+
+/* ============================================================
+   手机布局 v2
+   ============================================================
+
+   目标：
+   - 单屏优先，不滚动
+   - 标题隐藏
+   - 顶部/统计/每日关卡/操作栏只占必要高度
+   - board 自动占据所有剩余高度
+   - dailyStageBar 显示/隐藏不会打乱棋盘所在行
+   - 使用 100svh，避免地址栏收起造成首次触摸整体跳动
+   ============================================================ */
+
 @media(max-width:699px){
 
   html,
@@ -380,102 +478,231 @@ h1{
 
   body{
     overscroll-behavior:none;
+    -webkit-text-size-adjust:100%;
   }
 
   .app{
     width:100%;
-    /*
-      不用 100dvh：
-      手机浏览器首次触摸时地址栏/工具栏变化会改变 dvh，
-      导致棋盘高度重新计算，瓶子组整体跳动。
-
-      100svh 使用稳定的小视口高度，
-      页面不会因为浏览器 UI 收起/展开而改变游戏布局。
-    */
     height:100svh;
     min-height:0;
+
     padding:
-      max(6px,env(safe-area-inset-top))
-      7px
-      max(6px,env(safe-area-inset-bottom));
+      max(5px,env(safe-area-inset-top))
+      6px
+      max(5px,env(safe-area-inset-bottom));
 
-    display:grid;
+    /*
+      不再使用固定 grid-template-rows。
 
-    grid-template-rows:
-      auto
-      auto
-      minmax(0,1fr)
-      auto
-      18px;
+      每日关卡条出现/隐藏时，
+      board 仍然永远是唯一 flex:1 的区域。
+    */
+    display:flex;
+    flex-direction:column;
+    gap:4px;
 
-    gap:5px;
+    overflow:hidden;
   }
 
   /*
-    用户要求：
-    手机模式直接去掉标题。
+    手机不显示 Logo / 标题。
   */
   .topbar{
     display:none;
   }
 
+  /* ----------------------------
+     模式栏
+     ---------------------------- */
+
   .mode-bar{
+    flex:0 0 auto;
+
+    display:grid;
     grid-template-columns:
       repeat(3,minmax(0,1fr))
-      34px;
+      32px;
 
-    gap:4px;
-    padding:5px;
-    border-radius:14px;
+    gap:3px;
+
+    padding:4px;
+
+    border-radius:13px;
+
+    box-shadow:
+      0 5px 16px rgba(36,82,104,.07);
   }
 
   .mode-btn{
-    padding:6px 6px;
-    border-radius:10px;
+    min-width:0;
+
+    padding:5px 4px;
+
+    border-radius:9px;
+
     text-align:center;
   }
 
   .mode-btn span{
-    font-size:9px;
+    font-size:8px;
+    line-height:1.15;
   }
 
   .mode-btn strong{
-    margin-top:0;
-    font-size:10px;
+    margin-top:1px;
+
+    font-size:9px;
+    line-height:1.15;
   }
 
   .mobile-sound{
     display:block;
-    width:34px;
-    height:34px;
+
+    width:32px;
+    height:32px;
+
     align-self:center;
-    font-size:13px;
+
+    font-size:12px;
   }
 
+
+  /* ----------------------------
+     每日关卡切换
+     ---------------------------- */
+
+  .daily-stage-bar{
+    flex:0 0 auto;
+
+    gap:0;
+
+    margin:0;
+    padding:3px;
+
+    border-radius:12px;
+
+    overflow:hidden;
+  }
+
+  .daily-stage-label{
+    display:none;
+  }
+
+  .daily-stage-buttons{
+    display:flex;
+    flex:1 1 auto;
+
+    min-width:0;
+
+    gap:3px;
+
+    overflow-x:auto;
+    overflow-y:hidden;
+
+    scrollbar-width:none;
+
+    overscroll-behavior-x:contain;
+
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .daily-stage-buttons::-webkit-scrollbar{
+    display:none;
+  }
+
+  /*
+    4 关时自动平分整行；
+    以后增加到 5/6/7 关时，每个按钮最低 52px，
+    超出后横向滑动，不会把文字压成一团。
+  */
+  .daily-stage-chip{
+    flex:1 0 52px;
+
+    min-width:52px;
+    min-height:28px;
+
+    padding:2px 4px;
+
+    gap:2px;
+
+    border-radius:8px;
+  }
+
+  .daily-stage-chip .stage-number{
+    font-size:10px;
+    line-height:1;
+  }
+
+  .daily-stage-chip .stage-state{
+    font-size:7.5px;
+    line-height:1;
+  }
+
+
+  /* ----------------------------
+     三项状态
+     ---------------------------- */
+
   .stats{
-    gap:4px;
+    flex:0 0 auto;
+
+    grid-template-columns:
+      repeat(3,minmax(0,1fr));
+
+    gap:3px;
+
     margin:0;
   }
 
   .stat{
-    display:flex;
-    padding:5px 7px;
-    border-radius:10px;
+    min-width:0;
+
+    padding:4px 6px;
+
+    border-radius:9px;
   }
 
   .stat span{
-    font-size:9px;
+    font-size:8px;
   }
 
   .stat strong{
-    font-size:10px;
+    overflow:hidden;
+
+    font-size:9px;
+
+    text-overflow:ellipsis;
   }
 
+
+  /* ----------------------------
+     棋盘
+     ---------------------------- */
+
   .board-shell{
+    /*
+      手机页面唯一会自动伸缩的区域。
+    */
+    flex:1 1 0;
+
     min-width:0;
     min-height:0;
-    height:100%;
-    border-radius:15px;
+    height:auto;
+
+    overflow:hidden;
+
+    border-radius:14px;
+
+    box-shadow:
+      0 10px 28px rgba(36,82,104,.08);
+  }
+
+  .board-bg{
+    left:7%;
+    right:7%;
+    bottom:-65px;
+
+    height:140px;
   }
 
   #pixiHost{
@@ -485,95 +712,357 @@ h1{
   }
 
   #pixiHost canvas{
+    display:block;
+
     width:100%;
     height:100%;
+
+    max-width:100%;
+
+    touch-action:manipulation;
   }
 
-  .actions{
-    grid-template-columns:
-      repeat(5,1fr);
+  .loading{
+    font-size:10px;
+  }
 
-    gap:3px;
+
+  /* ----------------------------
+     操作栏
+     ---------------------------- */
+
+  .actions{
+    flex:0 0 auto;
+
+    grid-template-columns:
+      repeat(5,minmax(0,1fr));
+
+    gap:2px;
+
     margin:0;
-    padding:4px;
-    border-radius:13px;
+    padding:3px;
+
+    border-radius:12px;
   }
 
   .actions button{
-    min-height:36px;
-    padding:5px 2px;
-    border-radius:9px;
-    font-size:13px;
+    min-width:0;
+    min-height:32px;
+
+    padding:3px 1px;
+
+    border-radius:8px;
+
+    font-size:12px;
+    line-height:1;
   }
 
   .actions button span{
     display:block;
-    margin-top:1px;
+
+    margin-top:2px;
+
     overflow:hidden;
-    font-size:8px;
+
+    font-size:7px;
+    line-height:1;
+
     text-overflow:ellipsis;
     white-space:nowrap;
   }
 
+
+  /* ----------------------------
+     状态提示
+     ---------------------------- */
+
   .message{
-    min-height:18px;
-    height:18px;
+    flex:0 0 15px;
+
+    min-height:15px;
+    height:15px;
+
     margin:0;
-    font-size:9px;
-    line-height:18px;
+
+    font-size:8px;
+    line-height:15px;
   }
 
+
+  /* ----------------------------
+     弹窗
+     ---------------------------- */
+
   .modal{
-    padding:10px;
+    padding:
+      max(8px,env(safe-area-inset-top))
+      9px
+      max(8px,env(safe-area-inset-bottom));
   }
 
   .modal-card{
-    padding:20px 16px;
-    border-radius:20px;
+    width:min(390px,100%);
+
+    max-height:
+      calc(
+        100svh -
+        20px
+      );
+
+    overflow:auto;
+
+    padding:17px 14px;
+
+    border-radius:18px;
+  }
+
+  .bubble-title{
+    font-size:17px;
   }
 
   .modal h2{
-    font-size:24px;
+    margin:5px 0;
+
+    font-size:21px;
+  }
+
+  .stars{
+    margin:5px 0;
+
+    font-size:25px;
+  }
+
+  .reward-text{
+    min-height:18px;
+
+    font-size:12px;
+  }
+
+  .modal-note{
+    font-size:11px;
+  }
+
+  .challenge-input{
+    margin:12px 0;
+    padding:9px 11px;
+  }
+
+  .modal-actions{
+    gap:6px;
+    margin-top:11px;
+  }
+
+  .modal-actions button{
+    padding:9px 7px;
   }
 }
 
 
 /*
-  非常矮的手机再压缩一档。
+  窄屏手机：
+  进一步减少不必要文字宽度。
 */
-@media(max-width:699px) and (max-height:690px){
+@media(max-width:360px){
 
   .app{
-    gap:3px;
-    padding:
-      max(3px,env(safe-area-inset-top))
-      5px
+    padding-left:4px;
+    padding-right:4px;
+  }
+
+  .mode-bar{
+    grid-template-columns:
+      repeat(3,minmax(0,1fr))
+      29px;
+  }
+
+  .mobile-sound{
+    width:29px;
+    height:29px;
+  }
+
+  .mode-btn span{
+    font-size:7px;
+  }
+
+  .mode-btn strong{
+    font-size:8px;
+  }
+
+  .daily-stage-chip{
+    flex-basis:48px;
+    min-width:48px;
+  }
+
+  /*
+    320~350px 上五个操作按钮仍保持一行，
+    只隐藏文字，保留图标。
+  */
+  .actions button span{
+    display:none;
+  }
+
+  .actions button{
+    min-height:30px;
+    font-size:14px;
+  }
+}
+
+
+/*
+  很矮的手机：
+  优先把高度留给棋盘。
+*/
+@media(max-width:699px) and (max-height:650px){
+
+  .app{
+    gap:2px;
+
+    padding-top:
+      max(3px,env(safe-area-inset-top));
+
+    padding-bottom:
       max(3px,env(safe-area-inset-bottom));
   }
 
   .mode-bar{
-    padding:3px;
+    padding:2px;
   }
 
   .mode-btn{
-    padding:4px;
+    padding:3px 2px;
+  }
+
+  .mode-btn span{
+    display:none;
   }
 
   .mobile-sound{
-    width:30px;
-    height:30px;
+    width:27px;
+    height:27px;
   }
 
+  .daily-stage-bar{
+    padding:2px;
+  }
+
+  .daily-stage-chip{
+    min-height:24px;
+  }
+
+  .daily-stage-chip .stage-state{
+    font-size:7px;
+  }
+
+  /*
+    高度不足时状态栏只保留核心数值。
+  */
   .stat{
-    padding:3px 6px;
+    justify-content:center;
+    padding:3px 4px;
+  }
+
+  .stat span{
+    display:none;
+  }
+
+  .stat strong{
+    font-size:9px;
   }
 
   .actions{
-    padding:3px;
+    padding:2px;
   }
 
   .actions button{
-    min-height:31px;
-    padding:3px 2px;
+    min-height:28px;
+  }
+
+  .message{
+    flex-basis:13px;
+    height:13px;
+    min-height:13px;
+
+    font-size:7px;
+    line-height:13px;
+  }
+
+  .modal-card{
+    padding:13px 12px;
+  }
+}
+
+
+/*
+  横屏手机：
+  不让顶部控件抢走太多高度。
+*/
+@media(max-width:899px) and (orientation:landscape) and (max-height:520px){
+
+  .app{
+    width:100%;
+    height:100svh;
+
+    padding:
+      max(3px,env(safe-area-inset-top))
+      max(6px,env(safe-area-inset-right))
+      max(3px,env(safe-area-inset-bottom))
+      max(6px,env(safe-area-inset-left));
+
+    gap:2px;
+  }
+
+  .topbar{
+    display:none;
+  }
+
+  .mode-bar{
+    grid-template-columns:
+      repeat(3,minmax(0,1fr))
+      28px;
+
+    padding:2px;
+  }
+
+  .mode-btn{
+    padding:2px;
+  }
+
+  .mode-btn span{
+    display:none;
+  }
+
+  .mode-btn strong{
+    font-size:8px;
+  }
+
+  .mobile-sound{
+    display:block;
+
+    width:28px;
+    height:28px;
+  }
+
+  .stats{
+    display:none;
+  }
+
+  .daily-stage-bar{
+    padding:2px;
+  }
+
+  .daily-stage-chip{
+    min-height:23px;
+  }
+
+  .actions button{
+    min-height:27px;
+  }
+
+  .actions button span{
+    display:none;
+  }
+
+  .message{
+    display:none;
   }
 }

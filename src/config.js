@@ -9,9 +9,9 @@ window.SODA_CONFIG = Object.freeze({
     dailyRewardMin: 10,
     dailyRewardMax: 100,
 
-    extraBottleCost: 5,
-    hintCost: 1,
-    customChallengeCost: 1
+    extraBottleCost: 10,
+    hintCost: 5,
+    customChallengeCost: 5
   },
 
   board: {
@@ -38,19 +38,47 @@ window.SODA_CONFIG = Object.freeze({
   },
 
   colors: [
-  0xff5c70, // 红
-  0x3f82f7, // 蓝
-  0x58c95f, // 绿
-  0xffd33d, // 黄
+    /* 原来的 12 色：主线完全不变 */
+    0xff6678,
+    0x4f8ff7,
+    0x52ce7c,
+    0xffd451,
+    0x9c72ed,
+    0xff9d48,
+    0x39c6c8,
+    0x9b6a4a,
+    0xf06eaf,
+    0x658295,
+    0xef765d,
+    0x32aa91,
 
-  0x985ee8, // 紫
-  0xff9638, // 橙
-  0x22b8d1, // 青
-  0x8b603c, // 棕
+    /*
+      每日第 2 / 3 关扩展色。
+      刻意利用不同色相 + 明度来拉开差异。
+    */
+    0x2457d6, // 深皇家蓝
+    0x7d3fc7, // 深紫
+    0xd6a512, // 芥末黄
+    0x188a43, // 深绿
+    0xc75400, // 烧橙
+    0x72c8f4, // 浅天蓝
+    0xc985dc, // 浅紫
+    0x5ad9bd, // 薄荷
+    0xf3a0a8, // 浅珊瑚
+    0x455767, // 深灰蓝
+    0xb7d84b, // 黄绿
 
-  0xee66b7, // 粉
-  0x64798f, // 灰蓝
-  0xd94b35, // 深橘红
-  0x168c72  // 深青绿
+    /*
+      第 4 关以及未来扩展预留色。
+      目前第 4 关使用到前 29 色；总表预留到 31 色。
+    */
+    0xe83e8c, // 洋红
+    0x006d77, // 深青
+    0xf4b942, // 琥珀
+    0x386641, // 森林绿
+    0xb23a48, // 酒红
+    0x5a6fbf, // 靛蓝
+    0xf26a2e, // 鲜橙
+    0x6d28d9  // 深紫
   ]
 });

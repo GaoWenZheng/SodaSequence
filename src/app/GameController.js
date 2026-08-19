@@ -53,6 +53,16 @@
 
       this.winHandled=false;
 
+      /*
+        每日挑战现在是 3 连关。
+        这里只保存“本次运行”的阶段进度；
+        按之前的存档规则，不把中间第 1/2 关写入 localStorage。
+        只有全部每日阶段完成后 daily.completed 才会保存。
+      */
+      this.dailyStage=1;
+      this.dailyStageResults=[];
+      this.dailyKey=null;
+
       this.progress=
         new global.ProgressStore();
 
@@ -153,7 +163,7 @@
     modeLabel(){
 
       if(this.isDaily()){
-        return "每日·极难";
+        return `每日 ${this.dailyStage}/${global.DailyChallenge.STAGE_COUNT}`;
       }
 
       if(this.isCustom()){
@@ -473,12 +483,22 @@
         `第 ${this.progress.mainlineLevel} 关`;
 
 
+      const dailyCompletedCount=
+        this.progress
+          .dailyCompletedCount;
+
+
       document.getElementById(
         "dailyStateText"
       ).textContent=
         this.progress.dailyCompleted
-          ?"今日已完成 · 可重玩"
-          :"极难 · 10–100";
+          ?`今日 ${global.DailyChallenge.STAGE_COUNT}/${global.DailyChallenge.STAGE_COUNT} 已完成 · 可重玩`
+          :this.isDaily()
+            ?`第 ${this.dailyStage}/${global.DailyChallenge.STAGE_COUNT} 关 · 满分 ${global.DailyChallenge.maxScoreForStage(this.dailyStage)}`
+            :`已完成 ${dailyCompletedCount}/${global.DailyChallenge.STAGE_COUNT} · 总满分 ${global.DailyChallenge.totalMaximumScore()}`;
+
+
+      this.renderDailyStageSelector();
 
 
       document.getElementById(
@@ -535,6 +555,137 @@
         "soundBtnMobile"
       ).textContent=
         sound;
+    }
+
+
+    renderDailyStageSelector(){
+
+      const bar=
+        document.getElementById(
+          "dailyStageBar"
+        );
+
+
+      const host=
+        document.getElementById(
+          "dailyStageButtons"
+        );
+
+
+      if(
+        !bar ||
+        !host
+      ){
+        return;
+      }
+
+
+      const visible=
+        this.isDaily();
+
+
+      bar.classList.toggle(
+        "hidden",
+        !visible
+      );
+
+
+      if(!visible){
+        return;
+      }
+
+
+      const count=
+        global.DailyChallenge
+          .STAGE_COUNT;
+
+
+      host.innerHTML=
+        Array.from(
+          {
+            length:count
+          },
+          (_,index)=>{
+
+            const stage=
+              index+1;
+
+
+            const completed=
+              this.progress
+                .isDailyStageCompleted(
+                  stage
+                );
+
+
+            const unlocked=
+              this.progress
+                .isDailyStageUnlocked(
+                  stage
+                );
+
+
+            const active=
+              stage===
+              this.dailyStage;
+
+
+            const reward=
+              this.progress
+                .dailyStageReward(
+                  stage
+                );
+
+
+            const maxScore=
+              global.DailyChallenge
+                .maxScoreForStage(
+                  stage
+                );
+
+
+            let stateText=
+              `${maxScore}分`;
+
+
+            if(completed){
+
+              stateText=
+                reward==null
+                  ?"✓ 已完成"
+                  :`✓ ${reward}/${maxScore}`;
+            }
+            else if(!unlocked){
+
+              stateText=
+                "🔒";
+            }
+
+
+            return`
+              <button
+                class="daily-stage-chip
+                  ${active?"active":""}
+                  ${completed?"completed":""}
+                  ${!unlocked?"locked":""}
+                "
+                type="button"
+                data-daily-stage="${stage}"
+                ${!unlocked?"disabled":""}
+                title="${
+                  completed
+                    ?"已完成，可重新挑战"
+                    :unlocked
+                      ?"当前可挑战"
+                      :"完成前一关后解锁"
+                }"
+              >
+                <span class="stage-number">${stage}</span>
+                <span class="stage-state">${stateText}</span>
+              </button>
+            `;
+          }
+        ).join("");
     }
 
 
@@ -1583,42 +1734,162 @@
         return;
       }
 
+
       this.progress.refreshDaily();
 
       this.mode=
         MODE.DAILY;
 
-      const key=
+
+      this.dailyKey=
         global.DailyChallenge
           .localDateKey();
 
-      this.level=key;
+
+      /*
+        进入每日挑战：
+        - 优先打开当天第一个尚未完成的关卡；
+        - 如果全部完成，则回到第 1 关；
+        - 已完成的关卡可通过上方关卡条随时重玩。
+      */
+      this.dailyStage=
+        this.progress
+          .nextDailyStage;
+
+
+      this.dailyStageResults=[];
+
+
+      this.loadDailyStage(
+        this.dailyStage
+      );
+    }
+
+
+    loadDailyStage(stage){
+
+      if(this.hasRunningAnimations()){
+        return;
+      }
+
+
+      const requestedStage=
+        Math.max(
+          1,
+          Math.min(
+            global.DailyChallenge
+              .STAGE_COUNT,
+            Math.floor(
+              Number(stage)||1
+            )
+          )
+        );
+
+
+      if(
+        !this.progress
+          .isDailyStageUnlocked(
+            requestedStage
+          )
+      ){
+
+        this.setMessage(
+          `第 ${requestedStage} 关尚未解锁，请先完成前面的每日关卡。`
+        );
+
+        this.renderDailyStageSelector();
+
+        return;
+      }
+
+
+      this.mode=
+        MODE.DAILY;
+
+
+      this.dailyStage=
+        requestedStage;
+
+
+      this.dailyKey||=
+        global.DailyChallenge
+          .localDateKey();
+
+
+      this.level=
+        this.dailyKey;
+
 
       this.levelData=
         global.DailyChallenge
           .generate(
-            key
+            this.dailyKey,
+            this.dailyStage
           );
+
 
       this.initialState=
         new global.GameState(
           this.levelData.bottles
         );
 
+
       this.state=
         this.initialState.clone();
 
+
+      /*
+        resetRunState 只重置当前这一关，
+        dailyStageResults 不会被清除。
+      */
       this.resetRunState();
+
 
       this.render();
 
-      this.setMessage(
-        this.progress.dailyCompleted
-          ?"今日挑战已结算过积分，可以继续重玩，但不会再次获得积分。"
-          :"每日极难挑战：禁用加瓶和提示，首次完成按步数奖励 10～100 积分。"
-      );
-    }
 
+      const minMoves=
+        this.levelData.minMoves;
+
+
+      const stageMaxScore=
+        global.DailyChallenge
+          .maxScoreForStage(
+            this.dailyStage
+          );
+
+
+      const stageCompleted=
+        this.progress
+          .isDailyStageCompleted(
+            this.dailyStage
+          );
+
+
+      if(stageCompleted){
+
+        const claimed=
+          this.progress
+            .dailyStageReward(
+              this.dailyStage
+            );
+
+
+        this.setMessage(
+          `每日 ${this.dailyStage}/${global.DailyChallenge.STAGE_COUNT} · 最少 ${minMoves} 步 · 本关满分 ${stageMaxScore} 分 · ${
+            claimed==null
+              ?"奖励已领取"
+              :`已领取 ${claimed} 分`
+          }，可重新挑战。`
+        );
+      }
+      else{
+
+        this.setMessage(
+          `每日 ${this.dailyStage}/${global.DailyChallenge.STAGE_COUNT} · 最少 ${minMoves} 步 · 本关满分 ${stageMaxScore} 分 · 通关后立即结算。`
+        );
+      }
+    }
 
     openCustomChallenge(){
 
@@ -2286,6 +2557,14 @@
       let nextButtonText=
         "返回主线";
 
+      let resultText=
+        `${this.modeLabel()} · ${this.moveCount} 步`;
+
+      let winTitle=
+        this.isCustom()
+          ?"挑战完成"
+          :"主线完成";
+
 
       if(this.isMainline()){
 
@@ -2294,45 +2573,141 @@
             this.level
           );
 
+
         rewardText=
           `主线进度已自动保存：第 ${next} 关`;
+
 
         nextButtonText=
           "下一关";
       }
       else if(this.isDaily()){
 
-        /*
-          每日挑战积分只看当天第一次完成时的步数。
-          重玩仍然允许，但 ProgressStore.completeDaily()
-          会阻止第二次积分结算。
-        */
-        const dailyScore=
+        const minMoves=
+          this.levelData.minMoves;
+
+
+        const stageMaxScore=
           global.DailyChallenge
-            .scoreBySteps(
-              this.moveCount,
-              this.levelData.par
+            .maxScoreForStage(
+              this.dailyStage
             );
 
 
-        const result=
-          this.progress.completeDaily(
-            dailyScore
-          );
+        const stageScore=
+          global.DailyChallenge
+            .scoreStage(
+              this.dailyStage,
+              this.moveCount,
+              minMoves
+            );
 
 
-        rewardText=
-          result.rewarded
-            ?`每日挑战完成：${this.moveCount} 步，获得 ${dailyScore} 积分`
-            :"今日积分已领取，本次重玩不再获得积分";
+        const stageEfficiency=
+          global.DailyChallenge
+            .efficiencyPercent(
+              this.moveCount,
+              minMoves
+            );
 
-        nextButtonText=
-          "返回主线";
+
+        /*
+          每关立即结算。
+
+          completeDailyStage() 会：
+          - 首次完成：立即把 stageScore 加入积分；
+          - 保存该关已完成；
+          - 解锁下一关；
+          - 当天重玩同一关：不重复发积分。
+        */
+        const settlement=
+          this.progress
+            .completeDailyStage(
+              this.dailyStage,
+              stageScore
+            );
+
+
+        this.dailyStageResults[
+          this.dailyStage-1
+        ]={
+          stage:
+            this.dailyStage,
+
+          moves:
+            this.moveCount,
+
+          minMoves,
+
+          maxScore:
+            stageMaxScore,
+
+          score:
+            stageScore
+        };
+
+
+        winTitle=
+          `每日挑战 ${this.dailyStage}/${global.DailyChallenge.STAGE_COUNT} 完成`;
+
+
+        resultText=
+          `你的步数：${this.moveCount} · 最少步数：${minMoves}`;
+
+
+        if(settlement.rewarded){
+
+          rewardText=
+            `本关效率 ${stageEfficiency}% · 获得 ${stageScore}/${stageMaxScore} 积分`;
+        }
+        else{
+
+          const claimed=
+            this.progress
+              .dailyStageReward(
+                this.dailyStage
+              );
+
+
+          rewardText=
+            `本次得分 ${stageScore}/${stageMaxScore} · 本关积分已领取${
+              claimed==null
+                ?""
+                :`（首次 ${claimed} 分）`
+            }，重玩不重复奖励`;
+        }
+
+
+        if(
+          this.dailyStage<
+          global.DailyChallenge
+            .STAGE_COUNT
+        ){
+
+          nextButtonText=
+            `进入第 ${this.dailyStage+1}/${global.DailyChallenge.STAGE_COUNT} 关`;
+        }
+        else{
+
+          nextButtonText=
+            "返回主线";
+
+
+          if(
+            this.progress
+              .dailyCompleted
+          ){
+
+            rewardText+=
+              " · 今日全部每日关卡已完成";
+          }
+        }
       }
       else{
 
         rewardText=
           "指定挑战完成，不修改主线记录";
+
 
         nextButtonText=
           "返回主线";
@@ -2342,11 +2717,7 @@
       document.getElementById(
         "winTitle"
       ).textContent=
-        this.isDaily()
-          ?"每日挑战完成"
-          :this.isCustom()
-            ?"挑战完成"
-            :"主线完成";
+        winTitle;
 
 
       document.getElementById(
@@ -2359,7 +2730,7 @@
       document.getElementById(
         "resultText"
       ).textContent=
-        `${this.modeLabel()} · ${this.moveCount} 步`;
+        resultText;
 
 
       document.getElementById(
@@ -2391,7 +2762,6 @@
         140
       );
     }
-
 
     /* =========================================================
        Undo / redo / reset
@@ -2506,6 +2876,10 @@
 
     replayCurrent(){
 
+      /*
+        每日挑战的“再玩一次”就是重玩当前关，
+        包括最后一关，不再自动跳回第 1 关。
+      */
       this.reset();
     }
 
@@ -2514,14 +2888,29 @@
 
       this.hideWin();
 
+
       if(this.isMainline()){
 
         this.loadMainline();
+        return;
       }
-      else{
 
-        this.loadMainline();
+
+      if(
+        this.isDaily() &&
+        this.dailyStage<
+        global.DailyChallenge.STAGE_COUNT
+      ){
+
+        this.loadDailyStage(
+          this.dailyStage+1
+        );
+
+        return;
       }
+
+
+      this.loadMainline();
     }
 
 
@@ -2541,6 +2930,43 @@
         "dailyBtn"
       ).onclick=
         ()=>this.loadDaily();
+
+
+      document.getElementById(
+        "dailyStageButtons"
+      ).addEventListener(
+        "click",
+        event=>{
+
+          const button=
+            event.target.closest(
+              "[data-daily-stage]"
+            );
+
+
+          if(
+            !button ||
+            button.disabled
+          ){
+            return;
+          }
+
+
+          const stage=
+            Number(
+              button.dataset.dailyStage
+            );
+
+
+          if(
+            Number.isFinite(stage)
+          ){
+            this.loadDailyStage(
+              stage
+            );
+          }
+        }
+      );
 
 
       document.getElementById(

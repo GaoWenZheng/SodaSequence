@@ -55,6 +55,95 @@
         "resize",
         this.resizeHandler
       );
+
+
+      /*
+        手机端新增每日关卡切换条后，
+        pixiHost 的高度会在“不改变 window 尺寸”的情况下变化。
+
+        只监听 window.resize 不够：
+        进入每日模式 / 切换 UI 区块时，
+        canvas 可能继续保留旧高度。
+
+        ResizeObserver 直接监听 host 实际尺寸，
+        只有宽高真正变化才重新布局。
+
+        普通点击瓶子不会改变 host 尺寸，
+        因此不会重新引入“第一次点击瓶子整体上移”的旧问题。
+      */
+      this.observedHostSize={
+        width:0,
+        height:0
+      };
+
+
+      this.resizeObserver=
+        typeof ResizeObserver!=="undefined"
+          ?new ResizeObserver(
+              entries=>{
+
+                const entry=
+                  entries[0];
+
+
+                if(!entry){
+                  return;
+                }
+
+
+                const width=
+                  Math.round(
+                    entry.contentRect.width
+                  );
+
+
+                const height=
+                  Math.round(
+                    entry.contentRect.height
+                  );
+
+
+                if(
+                  Math.abs(
+                    width-
+                    this.observedHostSize.width
+                  )<1 &&
+                  Math.abs(
+                    height-
+                    this.observedHostSize.height
+                  )<1
+                ){
+                  return;
+                }
+
+
+                this.observedHostSize={
+                  width,
+                  height
+                };
+
+
+                this.layoutDirty=true;
+
+
+                if(
+                  this.activeAnimationCount===0
+                ){
+
+                  requestAnimationFrame(
+                    ()=>
+                      this.layoutIfNeeded()
+                  );
+                }
+              }
+            )
+          :null;
+
+
+      this.resizeObserver
+        ?.observe(
+          this.host
+        );
     }
 
     ensureActorCount(count){
@@ -358,13 +447,58 @@
           320px 左右：
           一行最多 4 个。
         */
+        /*
+          早期关卡瓶子少时保持原来的宽松布局。
+
+          每日后期关卡：
+          23 色 / 29 色会有 25~31 个瓶子。
+          如果仍然一行最多 5 个，会形成 5~7 行，
+          手机纵向根本放不下。
+
+          因此根据瓶子总数自动提高列数：
+            <18 瓶：5列
+            18~24：6列
+            >=25：7列
+
+          320px 窄屏仍然保守一点。
+        */
+        let mobileMaxCols;
+
+
+        if(width<340){
+
+          mobileMaxCols=
+            this.actors.length>=24
+              ?6
+              :4;
+        }
+        else if(
+          this.actors.length>=25
+        ){
+
+          mobileMaxCols=7;
+        }
+        else if(
+          this.actors.length>=18
+        ){
+
+          mobileMaxCols=6;
+        }
+        else{
+
+          mobileMaxCols=
+            width>=360
+              ?5
+              :4;
+        }
+
+
         cols=
           Math.min(
             this.actors.length,
-            width>=360
-              ?5
-              :4
+            mobileMaxCols
           );
+
 
         rows=
           Math.ceil(
@@ -373,7 +507,12 @@
           );
 
 
-        const sidePadding=16;
+        const sidePadding=
+          cols>=7
+            ?10
+            :cols>=6
+              ?12
+              :16;
 
         gap=
           cols<=1
@@ -428,7 +567,11 @@
           两行默认只留约 22px 的视觉间距。
         */
         const desiredRowGap=
-          22;
+          rows>=5
+            ?14
+            :rows>=4
+              ?17
+              :22;
 
 
         const maxBottleHeightByBoard=
@@ -452,9 +595,22 @@
           nominalBottleHeight;
 
 
+        /*
+          关卡瓶子非常多时允许再缩小一些。
+          普通主线仍保持 >= .40，
+          不影响原来的视觉尺寸。
+        */
+        const minMobileScale=
+          rows>=6
+            ?.30
+            :rows>=5
+              ?.33
+              :.40;
+
+
         scale=
           Math.max(
-            .40,
+            minMobileScale,
             Math.min(
               CFG.board.mobileScale,
               scaleByWidth,
@@ -534,9 +690,19 @@
           正常截图这种高度下，
           实际值仍然由“整体居中”决定。
         */
+        const minTopSpace=
+          rows>=6
+            ?20
+            :rows>=5
+              ?26
+              :rows>=4
+                ?34
+                :48;
+
+
         firstMouthY=
           Math.max(
-            48,
+            minTopSpace,
             firstMouthY
           );
       }
