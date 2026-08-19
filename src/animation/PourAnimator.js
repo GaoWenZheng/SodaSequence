@@ -354,6 +354,7 @@
       color,
       amount,
       onTargetProgress=null,
+      onFlowStrength=null,
       onCommit
     }) {
 
@@ -608,6 +609,26 @@
 
 
             /*
+              音频和视觉使用同一个瞬时流量 strength。
+
+              这样声音会：
+              - 刚出水时很轻
+              - 中段明显
+              - 尾段自然收掉
+
+              不会从瓶子抬起时就开始响。
+            */
+            if (
+              typeof onFlowStrength===
+              "function"
+            ) {
+              onFlowStrength(
+                strength
+              );
+            }
+
+
+            /*
               v3：
               spill angle 直接由预采样曲线插值，
               不再每帧二分求解。
@@ -714,6 +735,14 @@
 
           t => t
         );
+
+
+        if (
+          typeof onFlowStrength===
+          "function"
+        ) {
+          onFlowStrength(0);
+        }
 
 
         source.clearPourFlow(
@@ -857,6 +886,17 @@
 
 
       finally {
+
+        /*
+          异常中断 / 页面状态变化时也确保水声停止。
+        */
+        if (
+          typeof onFlowStrength===
+          "function"
+        ) {
+          onFlowStrength(0);
+        }
+
 
         source.clearPourFlow(
           target,

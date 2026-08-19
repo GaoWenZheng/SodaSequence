@@ -112,10 +112,102 @@
   }
 
 
+  /*
+    每日挑战积分：
+    - 参考步数以内：100
+    - 超过参考步数后，每约 10% 的参考步数降一档
+    - 每档 -10
+    - 最低 10
+
+    例：
+    par = 72
+      <=72 : 100
+      73~80:  90
+      81~88:  80
+      ...
+      最低 :  10
+
+    使用相对 par 而不是固定绝对步数，
+    避免每天关卡规模/难度变化时评分失真。
+  */
+  function scoreBySteps(
+    steps,
+    par
+  ){
+
+    const minScore=
+      global.SODA_CONFIG
+        .economy
+        .dailyRewardMin;
+
+    const maxScore=
+      global.SODA_CONFIG
+        .economy
+        .dailyRewardMax;
+
+
+    const safeSteps=
+      Math.max(
+        0,
+        Math.floor(
+          Number(steps)||0
+        )
+      );
+
+
+    const safePar=
+      Math.max(
+        1,
+        Math.floor(
+          Number(par)||1
+        )
+      );
+
+
+    if(
+      safeSteps<=safePar
+    ){
+      return maxScore;
+    }
+
+
+    /*
+      10% par 为一档，至少 1 步。
+      Math.ceil(72*0.1)=8。
+    */
+    const stepBand=
+      Math.max(
+        1,
+        Math.ceil(
+          safePar*.10
+        )
+      );
+
+
+    const extraSteps=
+      safeSteps-safePar;
+
+
+    const penaltyBands=
+      Math.ceil(
+        extraSteps/
+        stepBand
+      );
+
+
+    return Math.max(
+      minScore,
+      maxScore-
+      penaltyBands*10
+    );
+  }
+
+
   global.DailyChallenge=
     Object.freeze({
       localDateKey,
-      generate
+      generate,
+      scoreBySteps
     });
 
 })(window);

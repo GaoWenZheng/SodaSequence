@@ -2,10 +2,16 @@ window.SODA_CONFIG = Object.freeze({
   generatorVersion: 10,
 
   economy: {
-    dailyReward: 10,
-    extraBottleCost: 10,
-    hintCost: 5,
-    customChallengeCost: 5
+    /*
+      每日挑战只在当天第一次完成时奖励。
+      实际奖励由 DailyChallenge.scoreBySteps() 在 10~100 间计算。
+    */
+    dailyRewardMin: 10,
+    dailyRewardMax: 100,
+
+    extraBottleCost: 5,
+    hintCost: 1,
+    customChallengeCost: 1
   },
 
   board: {
@@ -32,17 +38,19 @@ window.SODA_CONFIG = Object.freeze({
   },
 
   colors: [
-    0xff6678,
-    0x4f8ff7,
-    0x52ce7c,
-    0xffd451,
-    0x9c72ed,
-    0xff9d48,
-    0x39c6c8,
-    0x9b6a4a,
-    0xf06eaf,
-    0x658295,
-    0xef765d,
-    0x32aa91
+  0xff5c70, // 红
+  0x3f82f7, // 蓝
+  0x58c95f, // 绿
+  0xffd33d, // 黄
+
+  0x985ee8, // 紫
+  0xff9638, // 橙
+  0x22b8d1, // 青
+  0x8b603c, // 棕
+
+  0xee66b7, // 粉
+  0x64798f, // 灰蓝
+  0xd94b35, // 深橘红
+  0x168c72  // 深青绿
   ]
 });
