@@ -9,7 +9,8 @@
       daily:{
         date,
         completed
-      }
+      },
+      soundEnabled
     }
 
     不保存：
@@ -19,6 +20,9 @@
     - 指定挑战
     - 当前棋盘
     - 道具使用状态
+
+    声音开关现在允许保存：
+    - soundEnabled
   */
 
   const KEY=
@@ -41,7 +45,9 @@
       daily:{
         date:todayKey(),
         completed:false
-      }
+      },
+
+      soundEnabled:true
     };
   }
 
@@ -110,10 +116,17 @@
           :fresh.daily;
 
 
+      const soundEnabled=
+        typeof raw.soundEnabled==="boolean"
+          ?raw.soundEnabled
+          :true;
+
+
       return{
         mainlineLevel:level,
         points,
-        daily
+        daily,
+        soundEnabled
       };
     }
 
@@ -160,7 +173,10 @@
 
           completed:
             this.data.daily.completed
-        }
+        },
+
+        soundEnabled:
+          this.data.soundEnabled
       };
 
 
@@ -194,6 +210,37 @@
       }
 
       return false;
+    }
+
+
+
+    get soundEnabled(){
+      return(
+        this.data.soundEnabled
+      );
+    }
+
+
+    setSoundEnabled(
+      enabled
+    ){
+
+      this.data.soundEnabled=
+        !!enabled;
+
+      this.save();
+
+      return(
+        this.data.soundEnabled
+      );
+    }
+
+
+    toggleSound(){
+
+      return this.setSoundEnabled(
+        !this.data.soundEnabled
+      );
     }
 
 

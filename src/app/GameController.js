@@ -57,10 +57,11 @@
         new global.ProgressStore();
 
       /*
-        声音不属于允许保存的三项记录，
-        因此只存在当前页面内。
+        声音开关从 ProgressStore 恢复，
+        刷新页面后保持上次状态。
       */
-      this.soundOn=true;
+      this.soundOn=
+        this.progress.soundEnabled;
 
       this.board=
         new global.BoardRenderer({
@@ -527,9 +528,10 @@
 
       this.progress.refreshDaily();
 
-      this.board.ensureActorCount(
-        this.state.bottleCount
-      );
+      const actorCountChanged=
+        this.board.ensureActorCount(
+          this.state.bottleCount
+        );
 
 
       for(
@@ -576,7 +578,26 @@
       }
 
 
-      this.board.layout();
+      /*
+        先更新 DOM 文本，再决定是否需要布局。
+
+        旧版是：
+          board.layout()
+          → updateMetaUI()
+
+        首次进入时 DOM 行高可能在 layout 之后才稳定，
+        第一次点击再次 layout 就会让全体瓶子跳一下。
+      */
+
+      this.updateMetaUI();
+
+
+      if(actorCountChanged){
+        this.board.layoutDirty=true;
+      }
+
+
+      this.board.layoutIfNeeded();
 
 
       const globalLocked=
@@ -625,7 +646,6 @@
           .hintCost;
 
 
-      this.updateMetaUI();
     }
 
 
@@ -1765,7 +1785,7 @@
         ()=>{
 
           this.soundOn=
-            !this.soundOn;
+            this.progress.toggleSound();
 
           this.updateMetaUI();
         };

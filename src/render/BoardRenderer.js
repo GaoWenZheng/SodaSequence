@@ -33,8 +33,23 @@
       // 只要 activeAnimationCount > 0，就暂时不响应 resize 布局。
       this.activeAnimationCount=0;
 
+      /*
+        普通选择状态变化不应该重新计算所有瓶子坐标。
+
+        只有：
+        - 第一次布局
+        - 瓶子数量变化
+        - resize
+        才真正 layout。
+      */
+      this.layoutInitialized=false;
+      this.layoutDirty=true;
+
       this.resizeHandler=
-        ()=>this.layout();
+        ()=>{
+          this.layoutDirty=true;
+          this.layout();
+        };
 
       window.addEventListener(
         "resize",
@@ -43,6 +58,10 @@
     }
 
     ensureActorCount(count){
+
+      const before=
+        this.actors.length;
+
 
       while(
         this.actors.length>count
@@ -59,6 +78,7 @@
           children:true
         });
       }
+
 
       while(
         this.actors.length<count
@@ -81,6 +101,19 @@
           actor.root
         );
       }
+
+
+      const changed=
+        before!==
+        this.actors.length;
+
+
+      if(changed){
+        this.layoutDirty=true;
+      }
+
+
+      return changed;
     }
 
     setState(
@@ -129,7 +162,7 @@
         }
       }
 
-      this.layout();
+      this.layoutIfNeeded();
     }
 
     syncActor(
@@ -177,7 +210,7 @@
       if(
         this.activeAnimationCount===0
       ){
-        this.layout();
+        this.layoutIfNeeded();
       }
     }
 
@@ -206,6 +239,18 @@
       }
     }
 
+
+
+
+    layoutIfNeeded(){
+
+      if(
+        !this.layoutInitialized ||
+        this.layoutDirty
+      ){
+        this.layout();
+      }
+    }
 
 
     layout(){
@@ -584,6 +629,9 @@
           );
         }
       }
+      this.layoutInitialized=true;
+      this.layoutDirty=false;
+
     }
 
     destroy(){
