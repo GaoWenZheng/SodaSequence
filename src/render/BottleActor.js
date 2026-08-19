@@ -74,26 +74,27 @@
       );
 
 
-      this.selection =
+      /*
+        =========================================================
+        选中效果：只加强瓶底阴影
+
+        不发光、不描边、不加箭头。
+        选中时只显示更深、更宽的底部阴影。
+        =========================================================
+      */
+
+      this.selectionShadow =
         new PIXI.Graphics();
 
-      this.selection
-        .ellipse(
-          0,
-          84,
-          37,
-          11
-        )
-        .fill({
-          color: 0xff7896,
-          alpha: 0.10
-        });
-
-      this.selection.visible =
+      this.selectionShadow.visible =
         false;
 
-      this.body.addChild(
-        this.selection
+      /*
+        阴影放在瓶体最底层。
+      */
+      this.body.addChildAt(
+        this.selectionShadow,
+        0
       );
 
 
@@ -140,6 +141,7 @@
       );
 
       this.drawBottle();
+      this.drawSelection();
     }
 
 
@@ -213,6 +215,63 @@
           width: 3.1,
           alpha: 0.38
         });
+    }
+
+
+
+    /* =========================================================
+       选中视觉
+
+       1. 用 BottleGeometry 的真实外轮廓描边
+       2. 瓶口上方放一个明显的小箭头
+       3. 再补一个瓶口短高光
+
+       不用滤镜/glow filter，避免手机额外 GPU 开销。
+       ========================================================= */
+
+    drawSelection() {
+
+      const g =
+        this.selectionShadow;
+
+      g.clear();
+
+
+      /*
+        BottleGeometry 的瓶底大约在 body y=78 附近。
+
+        这里用两层椭圆：
+        - 外层范围更大、更淡
+        - 内层更小、更深
+
+        不使用 blur/filter，
+        手机端开销很小。
+      */
+
+      g.ellipse(
+        0,
+        84,
+        38,
+        9
+      );
+
+      g.fill({
+        color: 0x4d6470,
+        alpha: 0.15
+      });
+
+
+      g.ellipse(
+        0,
+        84,
+        29,
+        6
+      );
+
+      g.fill({
+        color: 0x3b5260,
+        alpha: 0.22
+      });
     }
 
 
@@ -334,13 +393,13 @@
 
     setSelected(active) {
 
-      this.selection.visible =
+      this.selectionShadow.visible =
         !!active;
 
-      this.root.alpha =
-        active
-          ? 1
-          : 0.985;
+      /*
+        不改变瓶子的透明度、位置、缩放。
+      */
+      this.root.alpha = 1;
     }
 
 
