@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>苏打序列 · Soda Sequence</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <main class="app">
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="eyebrow">SODA SEQUENCE</div>
+        <h1>苏打序列</h1>
+      </div>
+      <button id="soundBtn" class="circle-btn sound-btn" type="button" aria-label="声音">🔊</button>
+    </header>
+
+    <section class="panel mode-bar">
+      <button id="mainlineBtn" class="mode-btn active" type="button">
+        <span>主线</span>
+        <strong id="mainlineLevelText">第 1 关</strong>
+      </button>
+
+      <button id="dailyBtn" class="mode-btn daily-btn" type="button">
+        <span>每日挑战</span>
+        <strong id="dailyStateText">极难 · +10</strong>
+      </button>
+
+      <button id="customBtn" class="mode-btn" type="button">
+        <span>指定挑战</span>
+        <strong>5 积分</strong>
+      </button>
+
+      <button id="soundBtnMobile" class="circle-btn mobile-sound" type="button" aria-label="声音">🔊</button>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <span>模式</span>
+        <strong id="modeText">主线</strong>
+      </div>
+      <div class="stat">
+        <span>步数</span>
+        <strong id="movesText">0</strong>
+      </div>
+      <div class="stat points-stat">
+        <span>积分</span>
+        <strong><span id="pointsText">0</span> ◈</strong>
+      </div>
+    </section>
+
+    <section class="panel board-shell">
+      <div class="board-bg"></div>
+      <div id="pixiHost"></div>
+      <div id="loadingText" class="loading">正在加载 PixiJS…</div>
+    </section>
+
+    <section class="panel actions">
+      <button id="undoBtn" type="button">
+        ↶ <span>撤销</span>
+      </button>
+
+      <button id="redoBtn" type="button">
+        ↷ <span>重做</span>
+      </button>
+
+      <button id="extraBottleBtn" class="boost-btn" type="button">
+        ＋ <span>瓶子 · 10</span>
+      </button>
+
+      <button id="hintBtn" class="boost-btn" type="button">
+        ✦ <span>提示 · 5</span>
+      </button>
+
+      <button id="resetBtn" type="button">
+        ⟳ <span>重置</span>
+      </button>
+    </section>
+
+    <p id="message" class="message">
+      主线进度会自动保存。
+    </p>
+  </main>
+
+
+  <div id="winModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="bubble-title">🫧 ✨ 🥤 ✨ 🫧</div>
+      <h2 id="winTitle">关卡完成</h2>
+      <div id="starsText" class="stars">⭐⭐⭐</div>
+      <p id="resultText"></p>
+      <p id="rewardText" class="reward-text"></p>
+
+      <div class="modal-actions">
+        <button id="replayBtn" type="button">再玩一次</button>
+        <button id="nextLevelBtn" class="primary-btn" type="button">下一关</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="customModal" class="modal hidden">
+    <div class="modal-card compact-modal">
+      <h2>指定关卡挑战</h2>
+      <p class="modal-note">
+        消耗 5 积分进入任意关卡。挑战结果不会修改主线记录。
+      </p>
+
+      <label class="challenge-input">
+        <span>关卡</span>
+        <input id="customLevelInput" type="number" min="1" step="1" value="1" inputmode="numeric">
+      </label>
+
+      <div class="modal-actions">
+        <button id="cancelCustomBtn" type="button">取消</button>
+        <button id="confirmCustomBtn" class="primary-btn" type="button">挑战 · 5</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.19.0/dist/pixi.min.js"></script>
+
+  <script src="src/config.js"></script>
+
+  <script src="src/core/GameState.js"></script>
+  <script src="src/core/Rules.js"></script>
+  <script src="src/core/MoveCommand.js"></script>
+  <script src="src/core/History.js"></script>
+
+  <script src="src/level/SeededRandom.js"></script>
+  <script src="src/level/Difficulty.js"></script>
+  <script src="src/level/LevelGenerator.js"></script>
+  <script src="src/level/DailyChallenge.js"></script>
+
+  <script src="src/render/BottleGeometry.js"></script>
+  <script src="src/render/FluidBody.js"></script>
+  <script src="src/render/BottleActor.js"></script>
+  <script src="src/render/BoardRenderer.js"></script>
+
+  <script src="src/animation/PourAnimator.js"></script>
+
+  <script src="src/app/ProgressStore.js"></script>
+  <script src="src/app/HintEngine.js"></script>
+  <script src="src/app/GameController.js"></script>
+
+  <script src="src/main.js"></script>
+</body>
+</html>

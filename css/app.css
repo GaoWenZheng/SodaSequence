@@ -1,0 +1,571 @@
+:root{
+  --text:#183648;
+  --muted:#78909f;
+  --line:rgba(48,83,101,.11);
+  --card:rgba(255,255,255,.70);
+  --pink:#ff7c99;
+  --shadow:0 18px 56px rgba(36,82,104,.11);
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  min-height:100%;
+}
+
+body{
+  margin:0;
+  color:var(--text);
+  font-family:Inter,"SF Pro Display","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  background:
+    radial-gradient(circle at 16% 8%,rgba(255,255,255,.98),transparent 30%),
+    radial-gradient(circle at 87% 15%,rgba(174,229,240,.48),transparent 30%),
+    linear-gradient(160deg,#fbfdfe,#edf7f9 52%,#e4f1f5);
+}
+
+button,
+input{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+  touch-action:manipulation;
+}
+
+button:disabled{
+  cursor:not-allowed;
+  opacity:.38;
+}
+
+.app{
+  width:min(1120px,100%);
+  margin:0 auto;
+  padding:22px 18px 34px;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:14px;
+}
+
+.eyebrow{
+  color:#88a0ad;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.27em;
+}
+
+h1{
+  margin:4px 0 0;
+  font-size:clamp(29px,5vw,45px);
+  letter-spacing:-.045em;
+}
+
+.panel{
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:var(--card);
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(16px) saturate(1.12);
+  -webkit-backdrop-filter:blur(16px) saturate(1.12);
+}
+
+.circle-btn{
+  width:42px;
+  height:42px;
+  padding:0;
+  border:1px solid var(--line);
+  border-radius:50%;
+  color:var(--text);
+  background:rgba(255,255,255,.77);
+}
+
+.mobile-sound{
+  display:none;
+}
+
+.mode-bar{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  padding:9px;
+}
+
+.mode-btn{
+  min-width:0;
+  padding:10px 12px;
+  border:1px solid transparent;
+  border-radius:14px;
+  color:#557083;
+  background:rgba(255,255,255,.62);
+  text-align:left;
+}
+
+.mode-btn span{
+  display:block;
+  color:#8197a4;
+  font-size:11px;
+  font-weight:750;
+}
+
+.mode-btn strong{
+  display:block;
+  margin-top:2px;
+  overflow:hidden;
+  color:#28485a;
+  font-size:13px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.mode-btn.active{
+  border-color:rgba(255,124,153,.22);
+  background:rgba(255,255,255,.96);
+  box-shadow:0 6px 18px rgba(65,101,120,.08);
+}
+
+.daily-btn.active{
+  border-color:rgba(141,102,234,.22);
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin:10px 0;
+}
+
+.stat{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:9px 12px;
+  border:1px solid rgba(47,84,103,.08);
+  border-radius:14px;
+  background:rgba(255,255,255,.52);
+}
+
+.stat span{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:750;
+}
+
+.stat strong{
+  font-size:13px;
+  white-space:nowrap;
+}
+
+.points-stat strong{
+  color:#845bdc;
+}
+
+.board-shell{
+  position:relative;
+  min-height:560px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 37%,rgba(255,255,255,.93),rgba(246,251,252,.66) 48%,rgba(228,243,247,.67));
+}
+
+.board-bg{
+  position:absolute;
+  left:14%;
+  right:14%;
+  bottom:-85px;
+  height:190px;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse,rgba(68,176,199,.12),transparent 68%);
+}
+
+#pixiHost{
+  position:relative;
+  z-index:1;
+  width:100%;
+  min-height:560px;
+}
+
+#pixiHost canvas{
+  display:block;
+  width:100%;
+  height:auto;
+  outline:none;
+  touch-action:manipulation;
+}
+
+.loading{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  color:#89a0ad;
+  font-size:13px;
+  pointer-events:none;
+}
+
+.board-shell.ready .loading{
+  display:none;
+}
+
+.actions{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;
+  margin-top:10px;
+  padding:8px;
+}
+
+.actions button{
+  min-width:0;
+  padding:10px 5px;
+  border:0;
+  border-radius:13px;
+  color:#466174;
+  background:rgba(255,255,255,.73);
+  font-weight:800;
+}
+
+.actions .boost-btn:not(:disabled){
+  color:#7654c2;
+  background:rgba(245,240,255,.87);
+}
+
+.message{
+  min-height:18px;
+  margin:9px 0 0;
+  overflow:hidden;
+  color:#78909f;
+  font-size:12px;
+  text-align:center;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  display:grid;
+  place-items:center;
+  padding:18px;
+  background:rgba(20,51,69,.24);
+  backdrop-filter:blur(8px);
+}
+
+.modal.hidden{
+  display:none;
+}
+
+.modal-card{
+  width:min(420px,100%);
+  padding:26px;
+  text-align:center;
+  border:1px solid rgba(48,83,101,.10);
+  border-radius:25px;
+  background:rgba(255,255,255,.96);
+  box-shadow:0 30px 90px rgba(22,63,84,.22);
+}
+
+.compact-modal{
+  width:min(360px,100%);
+}
+
+.bubble-title{
+  font-size:23px;
+  letter-spacing:3px;
+}
+
+.modal h2{
+  margin:8px 0;
+  font-size:28px;
+}
+
+.stars{
+  margin:8px 0;
+  font-size:32px;
+}
+
+.reward-text{
+  min-height:22px;
+  color:#805bc9;
+  font-weight:850;
+}
+
+.modal-note{
+  color:#7e919d;
+  font-size:13px;
+  line-height:1.6;
+}
+
+.challenge-input{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:17px 0;
+  padding:11px 14px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#f7fbfc;
+}
+
+.challenge-input span{
+  color:#78909f;
+  font-size:12px;
+  font-weight:800;
+}
+
+.challenge-input input{
+  width:120px;
+  border:0;
+  outline:0;
+  color:#244658;
+  background:transparent;
+  text-align:right;
+  font-size:18px;
+  font-weight:850;
+}
+
+.modal-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:16px;
+}
+
+.modal-actions button{
+  padding:11px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  color:var(--text);
+  background:#f7fbfc;
+  font-weight:850;
+}
+
+.primary-btn{
+  border:0 !important;
+  color:#fff !important;
+  background:
+    linear-gradient(135deg,#ff7896,#ff9db1) !important;
+  box-shadow:
+    0 9px 23px rgba(255,120,150,.21);
+}
+
+
+/* ============================================================
+   手机：
+   - 隐藏标题
+   - 整个 app 固定 100dvh
+   - board 使用剩余空间
+   - 页面本身不滚动
+   ============================================================ */
+
+@media(max-width:699px){
+
+  html,
+  body{
+    width:100%;
+    height:100%;
+    min-height:0;
+    overflow:hidden;
+  }
+
+  body{
+    overscroll-behavior:none;
+  }
+
+  .app{
+    width:100%;
+    height:100dvh;
+    min-height:0;
+    padding:
+      max(6px,env(safe-area-inset-top))
+      7px
+      max(6px,env(safe-area-inset-bottom));
+
+    display:grid;
+
+    grid-template-rows:
+      auto
+      auto
+      minmax(0,1fr)
+      auto
+      18px;
+
+    gap:5px;
+  }
+
+  /*
+    用户要求：
+    手机模式直接去掉标题。
+  */
+  .topbar{
+    display:none;
+  }
+
+  .mode-bar{
+    grid-template-columns:
+      repeat(3,minmax(0,1fr))
+      34px;
+
+    gap:4px;
+    padding:5px;
+    border-radius:14px;
+  }
+
+  .mode-btn{
+    padding:6px 6px;
+    border-radius:10px;
+    text-align:center;
+  }
+
+  .mode-btn span{
+    font-size:9px;
+  }
+
+  .mode-btn strong{
+    margin-top:0;
+    font-size:10px;
+  }
+
+  .mobile-sound{
+    display:block;
+    width:34px;
+    height:34px;
+    align-self:center;
+    font-size:13px;
+  }
+
+  .stats{
+    gap:4px;
+    margin:0;
+  }
+
+  .stat{
+    display:flex;
+    padding:5px 7px;
+    border-radius:10px;
+  }
+
+  .stat span{
+    font-size:9px;
+  }
+
+  .stat strong{
+    font-size:10px;
+  }
+
+  .board-shell{
+    min-width:0;
+    min-height:0;
+    height:100%;
+    border-radius:15px;
+  }
+
+  #pixiHost{
+    width:100%;
+    height:100%;
+    min-height:0;
+  }
+
+  #pixiHost canvas{
+    width:100%;
+    height:100%;
+  }
+
+  .actions{
+    grid-template-columns:
+      repeat(5,1fr);
+
+    gap:3px;
+    margin:0;
+    padding:4px;
+    border-radius:13px;
+  }
+
+  .actions button{
+    min-height:36px;
+    padding:5px 2px;
+    border-radius:9px;
+    font-size:13px;
+  }
+
+  .actions button span{
+    display:block;
+    margin-top:1px;
+    overflow:hidden;
+    font-size:8px;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  .message{
+    min-height:18px;
+    height:18px;
+    margin:0;
+    font-size:9px;
+    line-height:18px;
+  }
+
+  .modal{
+    padding:10px;
+  }
+
+  .modal-card{
+    padding:20px 16px;
+    border-radius:20px;
+  }
+
+  .modal h2{
+    font-size:24px;
+  }
+}
+
+
+/*
+  非常矮的手机再压缩一档。
+*/
+@media(max-width:699px) and (max-height:690px){
+
+  .app{
+    gap:3px;
+    padding:
+      max(3px,env(safe-area-inset-top))
+      5px
+      max(3px,env(safe-area-inset-bottom));
+  }
+
+  .mode-bar{
+    padding:3px;
+  }
+
+  .mode-btn{
+    padding:4px;
+  }
+
+  .mobile-sound{
+    width:30px;
+    height:30px;
+  }
+
+  .stat{
+    padding:3px 6px;
+  }
+
+  .actions{
+    padding:3px;
+  }
+
+  .actions button{
+    min-height:31px;
+    padding:3px 2px;
+  }
+}
